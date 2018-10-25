@@ -1,0 +1,7 @@
+baseURL = "https://beyondallrepair.com/"
+languageCode = "en-us"
+title = "Beyond All Repair"
+theme = "hello-friend"
+
+[params.logo]
+logoText = "beyond all repair"
