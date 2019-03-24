@@ -5,7 +5,7 @@ install: go get github.com/gohugoio/hugo && go install github.com/gohugoio/hugo
 script: make site
 deploy:
   provider: s3
-  bucket: beyondallrepair.com
+  bucket: beyondallrepair.com.site
   skip_cleanup: true
   local_dir: public
   access_key_id:
