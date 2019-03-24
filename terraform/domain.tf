@@ -1,11 +1,24 @@
-data "aws_acm_certificate" "site_cert" {
-  domain = "${var.cert_domain}"
-  most_recent = true
+resource "aws_acm_certificate" "site_cert" {
+  domain_name = "${var.cert_domain}"
+  subject_alternative_names = ["*.${var.cert_domain}"]
+  validation_method = "DNS"
+
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 data "aws_route53_zone" "zone" {
   name = "${var.zone}"
   private_zone = false
+}
+
+resource "aws_route53_record" "cert_validation" {
+  zone_id = "${data.aws_route53_zone.zone.id}"
+  name = "${lookup(aws_acm_certificate.site_cert.domain_validation_options[0], "resource_record_name")}"
+  type = "${lookup(aws_acm_certificate.site_cert.domain_validation_options[0], "resource_record_type")}"
+  ttl = 300
+  records = ["${lookup(aws_acm_certificate.site_cert.domain_validation_options[0], "resource_record_value")}"]
 }
 
 # A Records for v4
