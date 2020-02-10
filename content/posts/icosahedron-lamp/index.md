@@ -49,6 +49,8 @@ to use OpenSCAD this time for a number of reasons:
 
 ### Mathematical Basis
 
+#### Icosahedron Section
+
 {{< image src="icosahedron-explode.gif" caption="Animation showing how an icosahedron can be thought of many triangular-based pyramids meeting at its centre" position="center" style="border-radius:8px" >}}
 
 An Icosahedron is a polyhedron made of 20 identical equilateral triangular faces.  For this lamp, it helps to think of each of the faces as a triangular-base pyramid whose peak is at the centre of the icosahedron.  Given this, the lamp model simply models one "section" of an icosahedron, which is then printed 19 times (and then a similar model is used for the final, base section).  The animated gif above may help to visualise this (thanks to Adam Anderson, whose [model I modified](https://www.thingiverse.com/thing:1343285) to obtain the above animation).
@@ -78,6 +80,17 @@ Given that we know the angle between the two corners via the centre of the circl
   r_b = {l_e \over \sqrt{3}}
 \\]
 
-With this, we can now calculate points that make up an icosahedron section.
+With this, we can now calculate points that make up a solid icosahedron section.  However, there are a few more steps before we have an section we can use in the lamp.
+
+ * Truncate the top, such that there is a cavity in the centre of the icosahedron.
+ * Hollow out the section to make a 'lens'.
+ * Produce a lid.
+
+#### Modelling the Central Cavity
+
+The central cavity in the icosahedron is achieved by truncating the sections.  This is achieved by simply removing a pyramid from the top of the icosahedron section.  To model the pyramid to be removed from the top of each section, we can simply use the mathematics described for the larger icosahedron section above.  We'd simply substitute the icosahedron radius, \\(r_i\\), with the cavity radius, \\(r_c\\).
+
+#### Hollowing Out the Section
+
 
 ### OpenSCAD Model
