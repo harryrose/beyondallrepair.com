@@ -1,8 +1,8 @@
 +++
-title = "3D-Printed Icosahedron Lamp"
+title = "3D-Printed Icosahedron Lamp :: The Model"
 date  = "2020-02-08T20:00:00Z"
 description = "A build article discussing a 3D-printed icosahedron lamp using an arduino pro mini and a string of WS2811/WS2812 LEDs."
-cover = "posts/icosahedron-lamp/in-situ-shot-rect.jpg"
+cover = "posts/icosahedron-lamp-model/in-situ-shot-rect.jpg"
 author = "Harry"
 tags = [ "decoration", "3d-printing", "arduino", "led", "ws2812", "openscad" ]
 +++
@@ -14,7 +14,7 @@ segments of the icosahedron together.
 
 The design and build will be split into two articles.  The first (this one) will discuss the OpenSCAD model, and
 the mathematics behind it. I will cover the electronics and microcontroller code in an upcoming article.  However,
-if you're just interested in the source code, both the OpenSCAD model and the arduino source code is available 
+if you're just interested in the source code, both the OpenSCAD model and the arduino source code is available
 on [GitHub](https://github.com/harryrose/icosahedron-lamp).
 
 {{< toc >}}
@@ -92,5 +92,48 @@ The central cavity in the icosahedron is achieved by truncating the sections.  T
 
 #### Hollowing Out the Section
 
+{{<image src="wall_width.png" position="center" style="border-radius:8px">}}
+
+The lens of the icosahedron section must be hollow to allow the LED to sit inside, and for the light to radiate around it.  The sections have a wall width, \\(w\\), and a lens thickness, \\(t_l\\), which denote the thickness of the sides protruding from the base of the pyramid, and the thickness of the base respectively.  Given these, hollowing out the lens is simply a case of subtracting the right sized pyramid from the original section.  Therefore, we must calculate the base radius parameter that must be used for the smaller pyramid, \\(p_b'\\).
+
+This can be achieved fairly simply using similar triangles.  In the above diagram it can be seen we make a right-angled triangle through the origin of the pyramid base, one of the pyramid base's corners, and the midpoint of one of its sides.  We know that triangle has height, \\(h = \mathrm{cos}(120^\circ) \cdot r_b\\) or \\(h = 0.5 \cdot r_b\\).  From that we know that the new triangle will have height \\(h' = h - w \\) and further, from similar triangles, we know that
+the ratios of the sides must remain the same.  That is,
+\\[
+{h'\over h} = {r'b \over r_b}
+\\]
+and so substituting \\(h' = h - w\\) and \\(h = 0.5 \cdot r_b\\) we eventually get the result:
+\\[
+ r_b' = r_b - 2w
+\\]
+or, in order to obtain a wall width of \\(w\\), the radius of the pyramid we subtract must be reduced by \\(2w\\) from the original base.
+
+Of course, the maths above assumes the base of the original pyramid and the one we're subtracting are coplanar.  That's not the case here, as we want the lens to have a certain thickness, \\(t_l\\).  The same maths can still be followed but using the radius of the pyramid's base for an icosahedron of radius \\( r_b = r_i - t_l \\).
+
+#### Modelling the Lens Lid
+
+{{<image src="lid-model.png" position="center" style="border-radius:8px">}}
+The lens lid can be thought of as a truncated icosahedron section whose base starts at radius \\(r_c\\) and whose top is at \\(r_c - w \\) (assuming you want the lid thickness to equal your wall width).  The lid is not hollowed, but
+a circular hole is cut through the centre to allow the LED to be pushed through, and a triangular 'lip' is extruded in order to help the lid sit within the lens.
 
 ### OpenSCAD Model
+
+```javascript
+function icoRadiusToFaceEdgeLength(radius) = radius * 12 / (sqrt(3) * (3 + sqrt(5)));
+
+function icoRadiusToFaceRadius(radius) = icoRadiusToFaceEdgeLength(radius) / sqrt(3);
+
+function faceRadiusMinusWallWidth(radius, wallWidth) = radius - 2 * wallWidth;
+
+module pyramid(r, h) {
+  vertices = [[r,0,0], [r * cos(120),r * sin(120),0], [r * cos(240), r * sin(240),0],[0,0,h]];
+  polyhedron(points=vertices,faces=[[0,1,2],[1,0,3],[0,2,3],[2,1,3]]);
+}
+
+module icoSection(innerDepth, outerDepth) {
+  difference() {
+    pyramid(icoRadiusToFaceRadius(outerDepth), outerDepth);
+    translate([0,0,outerDepth - innerDepth])
+      pyramid(icoRadiusToFaceRadius(innerDepth), outerDepth);
+  }
+}
+```
